@@ -1,0 +1,296 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Rolling Update
+Parameters:
+  AMI:
+    Description: AMI id for the instance
+    Type: String
+    Default: ami-0bb35a5dad5658286
+
+  ApiVhost:
+    Description: Virtual host for your api
+    Type: String
+
+  Branch:
+    AllowedValues:
+      - integration
+      - uat
+      - master
+    Description: Environment for this stack
+    Type: String
+
+  EC2Key:
+    Description: Key pair for the instances
+    Type: String
+
+  ECRApiUri:
+    Description: Repository uri for API
+    Type: String
+
+  ECRDoengineUri:
+    Description: Repository uri for DoEngine
+    Type: String
+
+  ECRInterfaceUri:
+    Description: Repository uri for LLI
+    Type: String
+
+  EnvBucket:
+    Description: The S3 bucket for your container env files
+    Type: String
+
+  IAMInstanceProfile:
+    Description: IAM Instance Profile for the instances
+    Type: String
+
+  Notifications:
+    Description: Webhook to send deployment status updates to
+    Type: String
+
+  Subnets:   
+    Description: Subnets to launch instances into
+    Type: List<AWS::EC2::Subnet::Id>
+
+  StackSha:
+    Description: SHA of stack (if any), usually refers to
+                 Git commit of source git repo
+    Default: None provided
+    Type: String
+
+  StackVersion:
+    Description: Software version to deploy
+    Type: String
+
+  VPC:
+    Description: VPC to launch instances into
+    Type: AWS::EC2::VPC::Id
+
+Resources:
+  AutoScalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      MinSize: '1'
+      MaxSize: '4'
+      DesiredCapacity: '1'
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      VPCZoneIdentifier: !Ref Subnets
+      LoadBalancerNames:
+        - !Ref ELB
+      HealthCheckGracePeriod: 120
+      HealthCheckType: ELB
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+          PropagateAtLaunch: "true"
+        - Key: Environment
+          Value: Production
+          PropagateAtLaunch: "true"
+        - Key: Purpose
+          Value: WebServerGroup
+          PropagateAtLaunch: "false"
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT5M
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: '2'
+        MinInstancesInService: '0'
+        PauseTime: PT5M
+        SuspendProcesses:
+          - AlarmNotification
+        WaitOnResourceSignals: true
+
+  ELBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: elb-sg
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: 0.0.0.0/0
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId: !Ref VPC
+  ELB:
+    Type: 'AWS::ElasticLoadBalancing::LoadBalancer'
+    Properties:
+      ConnectionDrainingPolicy:
+        Enabled: true
+        Timeout: 30
+      CrossZone: true
+      HealthCheck:
+        HealthyThreshold: '2'
+        Interval: '10'
+        Target: 'HTTP:80/'
+        Timeout: '5'
+        UnhealthyThreshold: '2'
+      LoadBalancerName: !Join
+        - ''
+        - - 'lb-'
+          - !Ref 'AWS::StackName'
+          - |+
+      Listeners:
+        - InstancePort: '80'
+          InstanceProtocol: HTTP
+          LoadBalancerPort: '80'
+          Protocol: HTTP
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref ELBSecurityGroup
+      Subnets: !Ref Subnets
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: true
+      BlockDeviceMappings:
+        - DeviceName: '/dev/sda1'
+          Ebs:
+            VolumeSize: 50
+            VolumeType: gp2
+      IamInstanceProfile:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:iam::'
+            - !Ref 'AWS::AccountId'
+            - ':instance-profile/'
+            - !Ref IAMInstanceProfile
+            - |+
+      ImageId: !Ref AMI
+      InstanceType: t3a.large
+      KeyName: !Ref EC2Key
+      SecurityGroups:
+        - sg-04d6742fccc8a26c9
+      SpotPrice: '0.03'
+      UserData:
+        Fn::Base64:
+          Fn::Sub:
+            - |
+              #!/bin/bash
+              apt-get update -y
+              apt-get install -y python-pip
+              apt-get install -y python-setuptools curl
+              mkdir -p /var/www/html
+              touch /var/www/html/index.html
+              export MY_IP=`curl ifconfig.co`
+              echo '{
+                "type": "mrkdwn",
+                "text": "Deployment",
+                "blocks": [
+                  {
+                    "type": "context",
+                    "elements": [{
+                      "type": "mrkdwn",
+                      "text": "*Updating instance:* <http://${ELB_HOSTNAME}|${AWS::StackName}-'$MY_IP'>"
+                    }]
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Branch:* ${Branch}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commit:* ${StackSha}"
+                      }
+                    ]
+                  }
+                ]
+              }' > /var/www/html/message.json
+              curl -X POST ${Notifications} -d @/var/www/html/message.json
+              mkdir -p /opt/aws/bin
+              python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+              ls /opt/aws/bin/cfn-signal > cfn-results.txt
+              /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region} >> cfn-results.txt
+              /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region} >> cfn-results.txt
+              echo "${AWS::StackName} v${StackVersion}" >> /var/www/html/index.html
+              echo "${AWS::Region}" >> /var/www/html/index.html
+              cat cfn-results.txt >> /var/www/html/index.html
+              cat cfn-results.txt > /home/ubuntu/setup.log
+              apt-get update -y
+              apt-get install -y apt-transport-https ca-certificates software-properties-common unzip
+              curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+              unzip awscli-bundle.zip
+              ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+              aws sts get-caller-identity > /home/ubuntu/awscli-log.log
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+              sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+              apt-get update -y
+              apt-cache policy docker-ce > /home/ubuntu/docker-log.log
+              apt-get -y upgrade
+              apt -y install docker-ce
+              systemctl status docker >> /home/ubuntu/docker-log.log
+              usermod -aG docker ubuntu
+              chgrp -R docker /var/www/html
+              chmod g+wsxr /var/www/html
+              curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+              echo '{
+                "type": "mrkdwn",
+                "text": "Deployment",
+                "blocks": [
+                  {
+                    "type": "context",
+                    "elements": [{
+                      "type": "mrkdwn",
+                      "text": "*Updating instance:* <http://${ELB_HOSTNAME}|${AWS::StackName}-'$MY_IP'>"
+                    }]
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Note:* This is still a work in progress."
+                      }
+                    ]
+                  }
+                ]
+              }' > /var/www/html/message.json
+              docker network create ksl-network
+              docker pull jwilder/nginx-proxy:latest
+              docker run -d -p 80:80 \
+                -v /var/run/docker.sock:/tmp/docker.sock:ro \
+                --network ksl-network \
+                --restart unless-stopped \
+                --name proxy -e DEFAULT_HOST=${ELB_HOSTNAME} jwilder/nginx-proxy
+              \
+              docker pull nginx
+              docker run -d -p 8000:80 -v /var/www/html/:/usr/share/nginx/html/:ro \
+                --network ksl-network \
+                --name default_web -e VIRTUAL_HOST=${ELB_HOSTNAME} -e VIRTUAL_PORT=8000 nginx
+              \
+              curl -X POST ${Notifications} -d @/var/www/html/message.json
+              \
+              docker pull redis:alpine
+              docker run --name redis -d --restart unless-stopped \
+                --network ksl-network -p 6379:6379 redis:alpine
+              \
+              $(aws ecr get-login --no-include-email --region ${AWS::Region})
+              aws s3 cp s3://${EnvBucket}/kastle.${Branch}.env /home/ubuntu/ --region ${AWS::Region}
+              \
+              docker pull ${ECRApiUri}
+              docker run -d -p 8080:3000 \
+                --network ksl-network \
+                --restart unless-stopped \
+                --name kastle \
+                --env-file /home/ubuntu/kastle.${Branch}.env \
+                -e VIRTUAL_HOST=${ApiVhost} \
+                -e VIRTUAL_PORT=8080 \
+                ${ECRApiUri}
+              \
+              docker pull ${ECRDoengineUri}
+              docker pull ${ECRInterfaceUri}
+            - ELB_HOSTNAME: !GetAtt ELB.DNSName
+Outputs:
+  ELB:
+    Value: !Join 
+      - ''
+      - - 'http://'
+        - !GetAtt 
+          - ELB
+          - DNSName
+    Description: Load Balancer URL

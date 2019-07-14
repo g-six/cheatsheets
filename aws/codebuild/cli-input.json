@@ -1,0 +1,61 @@
+{
+    "name": "codebuild-cli-exorcise",
+    "description": "",
+    "source": {
+        "type": "CODECOMMIT",
+        "location": "<https clone url from codecommit>",
+        "gitCloneDepth": 0,
+        "buildspec": "<url to your buildspec.yaml artifact>",
+        "insecureSsl": true
+    },
+    "artifacts": {
+        "type": "NO_ARTIFACTS"
+    },
+    "cache": {
+        "type": "NO_CACHE",
+        "location": ""
+    },
+    "environment": {
+        "type": "LINUX_CONTAINER",
+        "image": "aws/codebuild/nodejs:8.11.0",
+        "computeType": "BUILD_GENERAL1_MEDIUM",
+        "environmentVariables": [
+            {
+                "name": "SKYWALK_API_HOST",
+                "value": "https://api.github.com/orgs/facebook",
+                "type": "PLAINTEXT"
+            }
+        ],
+        "privilegedMode": true
+    },
+    "serviceRole": "arn:aws:iam::XXXXXXXXX:role/XXXXXXXX",
+    "timeoutInMinutes": 7,
+    "tags": [
+        {
+            "key": "owner",
+            "value": "g6"
+        },
+        {
+            "key": "action",
+            "value": "deleteme"
+        }
+    ],
+    "vpcConfig": {
+        "vpcId": "vpc-XXXX",
+        "subnets": [
+            "subnet-XXXX",
+        ],
+        "securityGroupIds": [
+            "sg-XXXX",
+        ]
+    },
+    "badgeEnabled": true,
+    "logsConfig": {
+        "cloudWatchLogs": {
+            "status": "DISABLED"
+        },
+        "s3Logs": {
+            "status": "DISABLED"
+        }
+    }
+}

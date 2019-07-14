@@ -1,0 +1,84 @@
+Resources:
+  # SpotFleetRole:
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #       - Action:
+  #         - sts:AssumeRole
+  #         Effect: Allow
+  #         Principal:
+  #           Service:
+  #           - spotfleet.amazonaws.com
+  #       Version: 2012-10-17
+  #     ManagedPolicyArns:
+  #     - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
+  #     Path: /
+  #   Type: AWS::IAM::Role
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones:
+        - ap-southeast-1b
+      LaunchConfigurationName: !Ref LaunchConfig
+      MaxSize: 1
+      MinSize: 1
+
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      IamInstanceProfile: pat-instance-profile
+      ImageId: ami-0d000807c69ed2f63
+      InstanceType: t3a.large
+      KeyName: pat-id_rsa
+      SecurityGroups:
+        - secgroup-web
+      SpotPrice: '0.036'
+
+#  LaunchTemplate:
+#    Type: AWS::EC2::LaunchTemplate
+#    Properties:
+#      LaunchTemplateData:
+#        IamInstanceProfile:
+#          Name: pat-instance-profile
+#        ImageId: ami-0d000807c69ed2f63
+#        InstanceType: t3a.large
+#        KeyName: pat-id_rsa
+#        SecurityGroups:
+#          - secgroup-web
+#        TagSpecifications:
+#        - ResourceType: instance
+#          Tags: 
+#           - Key: Name
+#             Value: bran
+#           - Key: Delete
+#             Value: yes
+
+      # IamInstanceProfile:
+      #   Arn: pat-instance-profile
+      # SpotFleetRequestConfigData:
+      #   IamFleetRole:
+      #     Fn::GetAtt:
+      #       - SpotFleetRole
+      #       - Arn
+      #   ImageId: 'ami-0d000807c69ed2f63'
+      #   InstanceType: t3a.large
+      #   InstanceInterruptionBehavior: 'stop'
+      #   TargetCapacity: 1
+      #   LaunchSpecifications:
+      #     - EbsOptimized: 'false'
+      #       IamInstanceProfile:
+      #         Arn: pat-instance-profile
+      #       ImageId: 'ami-0d000807c69ed2f63'
+      #       InstanceType: t3a.large
+      #       KeyName: pat-id_rsa
+      #       SecurityGroups:
+      #         - GroupId: sg-04d6742fccc8a26c9
+      #       SpotPrice: '0.035'
+      #       TagSpecifications:
+      #         - ResourceType: instance
+      #           Tags: 
+      #             - Key: Name
+      #               Value: bran
+      #             - Key: Delete
+      #               Value: yes
+

@@ -1,0 +1,18 @@
+{
+  "Comment": "Add DNS record for EC2",
+  "Changes": [
+    {
+      "Action": "UPSERT",
+      "ResourceRecordSet": {
+        "Name": "devbox-g6.npcand.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "3.1.26.89"
+          }
+        ]
+      }
+    }
+  ]
+}

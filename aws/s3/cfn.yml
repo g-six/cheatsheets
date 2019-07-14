@@ -1,0 +1,19 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  StackBucketName:
+    Type: String
+    Description: Your bucket name.
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: !Ref StackBucketName
+    DeletionPolicy: Delete
+Outputs:
+  BucketURL:
+    Value: !GetAtt S3Bucket.RegionalDomainName
+    Description: Name of S3 bucket to hold website content

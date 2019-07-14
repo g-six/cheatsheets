@@ -1,0 +1,18 @@
+{
+  "Comment": "Remove DNS record for EC2",
+  "Changes": [
+    {
+      "Action": "DELETE",
+      "ResourceRecordSet": {
+        "Name": "devbox-tres.npcand.com.",
+        "Type": "A",
+        "TTL": 300,
+        "ResourceRecords": [
+          {
+            "Value": "3.1.26.89"
+          }
+        ]
+      }
+    }
+  ]
+}

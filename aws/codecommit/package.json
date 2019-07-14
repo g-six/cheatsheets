@@ -1,0 +1,14 @@
+{
+  "name": "codecommit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "create-pr": "aws codecommit create-pull-request --profile $PROFILE --targets repositoryName=$REPO,sourceReference=$FROM,destinationReference=$TO",
+    "comment-with-ticket": "aws codecommit post-comment-for-pull-request --profile $PROFILE --pull-request-id $PR_ID --content 'https: \/\/cand1d.atlassian.net\/browse\/'$TICKET --repository-name $REPO --after-commit-id $AFTER_COMMIT --before-commit-id $BEFORE_COMMIT",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Gerard Echiverri <gerard@idearobin.com>",
+  "license": "ISC"
+}

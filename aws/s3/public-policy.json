@@ -1,0 +1,12 @@
+{
+  "Statement": [
+    {
+      "Resource": "arn:aws:s3:::greative-assets/*",
+      "Action": "s3:GetObject",
+      "Principal": "*",
+      "Effect": "Allow",
+      "Sid": "AddPerm"
+    }
+  ],
+  "Version": "2012-10-17"
+}

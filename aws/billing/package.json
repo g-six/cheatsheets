@@ -1,0 +1,15 @@
+{
+  "name": "billing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "billing": "aws ce get-cost-and-usage --time-period Start=$START,End=$END --granularity MONTHLY --metrics BlendedCost UnblendedCost UsageQuantity --group-by 'Type=DIMENSION,Key=SERVICE' --profile $PROFILE --output table --query ResultsByTime[*].Groups[*]",
+    "total": "aws ce get-cost-and-usage --time-period Start=$START,End=$END --granularity MONTHLY --metrics BlendedCost UnblendedCost UsageQuantity --group-by 'Type=DIMENSION,Key=SERVICE' --profile $PROFILE --output table --query ResultsByTime[*].Groups[*].[Keys[0],Metrics.BlendedCost.Amount,Metrics.UnblededCost.Amount]",
+    "billing:unblended": "aws ce get-cost-and-usage --time-period Start=$START,End=$END --granularity MONTHLY --metrics UnblendedCost --group-by 'Type=DIMENSION,Key=SERVICE' --profile $PROFILE --output table --query ResultsByTime[0].Groups[*].[Keys[0],Metrics.UnblendedCost.Amount,Metrics.UnblendedCost.Unit]",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Gerard Echiverri <gerard@idearobin.com>",
+  "license": "ISC"
+}

@@ -1,13 +1,13 @@
 #!/bin/bash
 export AWS_ID=`aws sts get-caller-identity --query Account --output text`
 export EC2_PROFILE="arn:aws:iam::"$AWS_ID":instance-profile/instance-role"
-export EC2_SECGROUP=secgroup-web
+export EC2_SECGROUP=secgroup-windows
 
 export SPOT_PRICE=`aws ec2 describe-spot-price-history \
   --no-paginate \
   --availability-zone ap-southeast-1a \
   --instance-types $EC2_TYPE \
-  --product-descriptions "Linux/UNIX" \
+  --product-descriptions Windows \
   --output text \
   --query SpotPriceHistory[0].SpotPrice`
 

@@ -11,5 +11,5 @@ aws ec2 request-spot-instances \
         \"InstanceType\":\"t3a.large\", \
         \"KeyName\":\"$EC2_KEY\", \
         \"IamInstanceProfile\": {\"Arn\": \"$DEVBOX_ROLE_ARN\"}, \
-        \"SecurityGroups\": [\"secgroup-web\"]
+        \"SecurityGroups\": [\"$SECGROUP\"]
     }"

@@ -1,13 +1,47 @@
 #!/bin/bash
+if [[ -z $EC2_TAG ]] ; then
+  echo "\nPlease provide a short description for your instances"
+  echo "export EC2_TAG=\n"
+  exit 1
+fi
+
+if [[ -z $EC2_KEY ]] ; then
+  echo "\nPlease provide key-pair for launch"
+  echo "export EC2_KEY=\n"
+  exit 1
+fi
+
+if [[ -z $EC2_SECGROUP ]] ; then
+  echo "\nPlease set security group"
+  echo "export EC2_SECGROUP=\n"
+  exit 1
+fi
+
+if [[ -z $EC2_TYPE ]] ; then
+  echo "\nPlease set desired instance type"
+  echo "export EC2_TYPE=\n"
+  exit 1
+fi
+
+if [[ -n $AMI_NAME ]] ; then
+  export AMI_NAME=","$AMI_NAME
+fi
+
 export AWS_ID=`aws sts get-caller-identity --query Account --output text`
+echo 'Account: '$AWS_ID
+
 export IAM_USER=`aws sts get-caller-identity --query UserId --output text`
+echo 'Username: '$IAM_USER
+
 export EC2_PROFILE="arn:aws:iam::"$AWS_ID":instance-profile/instance-role"
-export EC2_SECGROUP=secgroup-web
+echo 'Instance profile: '$EC2_PROFILE
+echo "Key pair: "$EC2_KEY
+
 export AMI_ID=`aws ec2 describe-images \
   --owners self \
   --output text \
   --query Images[0].[ImageId] \
-  --filters Name=name,Values="Node*,Ubuntu*"`
+  --filters Name=name,Values="Node*,Ubuntu*$AMI_NAME"`
 echo 'AMI ID: '$AMI_ID
 
 export SPOT_PRICE=`aws ec2 describe-spot-price-history \
@@ -34,11 +68,13 @@ export SPOT_REQ_ID=`aws ec2 request-spot-instances \
         \"KeyName\":\"$EC2_KEY\", \
         \"Placement\":{\"AvailabilityZone\": \"ap-southeast-1a\"}, \
         \"IamInstanceProfile\": {\"Arn\": \"$EC2_PROFILE\"}, \
-        \"SecurityGroups\": [\"$EC2_SECGROUP\"]
+        \"SecurityGroups\": [\"$EC2_SECGROUP\"], \
+        \"UserData\": \"$EC2_B64\"
     }"`
 echo 'SPOT_REQ_ID='$SPOT_REQ_ID
-if [[ $SPOT_REQ_ID -eq "" ]] ; then
-    exit 1
+if [[ -z $SPOT_REQ_ID ]] ; then
+  echo "Unable to fulfill request-spot-instances"
+  exit 1
 fi
 
 sleep 5

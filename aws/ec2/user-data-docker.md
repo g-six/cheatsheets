@@ -15,3 +15,8 @@ chmod +x /usr/local/bin/docker-compose
 docker network create ksl-network
 reboot
 ```
+
+To pass inline (cli)m you need to base64 encode the above:
+```bash
+export EC2_B64=$(base64 --input user-data-docker.sh)
+```

@@ -1,0 +1,37 @@
+IRDeveloperDefaultPolicy
+Developer default policy allowing full access to AWS resources within Singapore
+---
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "*"
+            ],
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "aws:RequestedRegion": "ap-southeast-1"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:List*",
+                "route53:*"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:*AccessKey*"
+            ],
+            "Resource": [
+                "arn:aws:iam::AWS-ACCOUNT-ID-WITHOUT-HYPHENS:user/${aws:username}"
+            ]
+        }
+    ]
+}

@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 
 # Emojis
 ROCKET='\xf0\x9f\x9a\x80'
+WRONG='\xe2\x9d\x8c'
 
 
 case $2 in
@@ -30,7 +31,7 @@ OPTS="--group-name ${3}"
 DESCRIPTION="Description=${4}"
 
 if [ $DESCRIPTION = "Description=" ]; then
-  printf "${RED}\nYou need to provide a description for IP: ${CIDR}${NC}\n\n"
+  printf "\n${WRONG} ${RED}You need to provide a description for IP: ${CIDR}${NC}\n\n"
   exit
 fi
 
@@ -46,7 +47,7 @@ case $1 in
     OPTS="${OPTS} --port 22 --protocol tcp --cidr ${CIDR}"
     ;;
   *)
-    echo 'invalid use of command\nplease choose from\nadd, or\nremove\n'
+    echo $WRONG'invalid use of command\nplease choose from\nadd, or\nremove\n'
     exit
     ;;
 esac

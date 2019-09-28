@@ -17,9 +17,9 @@ OPTS="--group-name ${3}"
 case $1 in
   add)
     COMMAND='authorize-security-group-ingress'
-    OPTS='--ip-permissions'
+    OPTS=$OPTS' --ip-permissions'
     OPTS=$OPTS' FromPort=22,ToPort=22,IpProtocol=tcp,IpRanges=['
-    OPTS=$OPTS"'"'{CidrIp=${CidrIp='$CIDR',Description='$4"'}]"
+    OPTS=$OPTS"'"'{CidrIp='$CIDR',Description='$4"'}]"
     ;;
   remove)
     COMMAND='revoke-security-group-ingress'

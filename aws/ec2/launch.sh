@@ -41,7 +41,7 @@ export AMI_ID=`aws ec2 describe-images \
   --owners self \
   --output text \
   --query Images[0].[ImageId] \
-  --filters Name=name,Values="Node*,Ubuntu*$AMI_NAME"`
+  --filters Name=name,Values="$AMI_NAME"`
 echo 'AMI ID: '$AMI_ID
 
 export SPOT_PRICE=`aws ec2 describe-spot-price-history \

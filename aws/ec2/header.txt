@@ -1,0 +1,7 @@
++-----------------------------------------------------+
+| This bash util was witten by g-six                  |
+| For any questions, comments, issues, or help needed |
+| needed on this script, please don't hesitate to ask |
+| Stack Overflow:                                     |
+|   "Common bash commands for dummies."               |
++-----------------------------------------------------+

@@ -92,4 +92,10 @@ aws ec2 create-tags \
   --tags Key=Name,Value="$EC2_TAG" \
          Key=Creator,Value="$IAM_USER"
 
+export EC2_ASSOC=`aws ec2 associate-address \
+	--allocation-id $EC2_EIP \
+	--instance-id $EC2_ID`
+
+echo 'Elastic IP Association ID='$EC2_ASSOC
+
 echo '\n'

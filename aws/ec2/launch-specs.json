@@ -1,0 +1,8 @@
+{
+  "ImageId": "ami-0b5e9e91c9a51c1be",
+  "InstanceType": "t3a.medium",
+  "KeyName": "kp-nerubia-devbox",
+  "IamInstanceProfile": { "Arn": "arn:aws:iam::011338992577:instance-profile/instance-role" },
+  "SecurityGroups": ["secgroup-web"],
+  "UserData": "IyEvYmluL2Jhc2gKYWRkLWFwdC1yZXBvc2l0b3J5ICJkZWIgW2FyY2g9YW1kNjRdIGh0dHBzOi8vZG93bmxvYWQuZG9ja2VyLmNvbS9saW51eC91YnVudHUgYmlvbmljIHN0YWJsZSIKYXB0LWdldCAteSB1cGRhdGUKYXB0LWNhY2hlIHBvbGljeSBkb2NrZXItY2UKYXB0LWNhY2hlIHBvbGljeSBkb2NrZXItY2UKdXNlcm1vZCAtYUcgZG9ja2VyIHVidW50dQpjdXJsIC1MIGh0dHBzOi8vZ2l0aHViLmNvbS9kb2NrZXIvY29tcG9zZS9yZWxlYXNlcy9kb3dubG9hZC8xLjI0LjEvZG9ja2VyLWNvbXBvc2UtYHVuYW1lIC1zYC1gdW5hbWUgLW1gIC1vIC91c3IvbG9jYWwvYmluL2RvY2tlci1jb21wb3NlCmNobW9kICt4IC91c3IvbG9jYWwvYmluL2RvY2tlci1jb21wb3NlCmRvY2tlciBuZXR3b3JrIGNyZWF0ZSBrc2wtbmV0d29yawpyZWJvb3Q="
+}

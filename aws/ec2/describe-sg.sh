@@ -3,9 +3,9 @@ HEADER=$(cat ./header.txt)
 
 SERVICE='ec2'
 CMD="aws ${SERVICE}"
-OPTS="--group-name "
+OPTS="--group-name "$1
 COMMAND='describe-security-groups'
-if [ $OPTS -eq "${OPTS}${1}" ]; then
+if [ -z $1 ]; then
   OPTS='';
 fi
 

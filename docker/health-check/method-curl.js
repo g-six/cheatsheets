@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk')
-const http = require('https')
-const config = require('./.env')
+const https = require('https')
+const config = require('./config')
+const { notifySlack } = require('./notify-slack')
 console.log('Configure AWS')
 console.log(config.aws)
 AWS.config.update(config.aws)
@@ -14,11 +15,29 @@ const textError = err => {
   console.error(err, err.stack)
 }
 
-const notify = state => {
+const sms_cooldown = 10 // minutes
+let countdown = sms_cooldown - 1
+const notify = (server, state) => {
+  const Message = `${server} current state: ${state}`
   const params = {
     ...config.sms,
-    Message: `${process.argv[3]} is ${state}`,
+    Message,
   }
+
+  notifySlack(Message)
+
+  if (!countdown) {
+    countdown = sms_cooldown
+    console.log('reset countdown')
+    return
+  }
+
+  if (sms_cooldown != countdown + 1) {
+    console.log(`Skipping. Text already sent ${sms_cooldown - countdown} minutes ago`)
+    return
+  }
+
+  countdown = countdown - 1 
 
   const setSMSTypePromise = new AWS.SNS({ apiVersion })
     .setSMSAttributes({
@@ -36,40 +55,43 @@ const notify = state => {
   }).catch(textError)
 }
 
-const callback = res => {
-  console.log(res.statusCode)
-
-  res.setEncoding('utf8')
-  res.on('data', data => {
-    const containers = JSON.parse(data)
-    containers.forEach(container => {
-      const [name] = container.Names
-      const { State: state, Status: status } = container
-
-      if (state.toLowerCase() === 'running') {
-        console.log(`${name} ${status}`)
-      } else {
-        console.log(`${name} ${state}`)
-        notify({ name, state, status })
-      }
-    })
-  })
-  res.on('error', console.error)
-}
-
 let data = ''
-const ccc = res => {
+const callback = server => res => {
   if (res.statusCode >= 500) {
     console.err(res.statusCode)
-    notify(`down [${res.statusCode}]`)
+    notify(server, `down [${res.statusCode}]`)
   } else {
     console.log('All things clear')
   }
 }
 
-const client_request = http
-  .get(process.argv[2], ccc)
-  .on('error', err => {
-    notify('fatal error')
+const sites = require('./sites.js')
+const sitrep = () => {
+  let client_request
+
+  sites.forEach(site => {
+    client_request = https
+      .get(site[0], callback(site[1]))
+      .on('error', err => {
+        notify(site[1], 'fatal error')
+      })
+    client_request.end()
   })
-client_request.end()
+}
+
+setInterval(() => {
+  console.log('Ping servers')
+  sitrep()
+}, 60 * 1000) // Every minute
+
+sitrep()
+
+const http = require('http')
+
+console.log('creating server')
+
+const server = http.createServer((req, res) => {
+  console.log('test')
+  res.end();
+});
+server.listen(6969)

@@ -2,9 +2,9 @@
   "name": "sitrep",
   "version": "0.0.1",
   "description": "Container monitoring system",
-  "main": "sitrep.js",
+  "main": "method-curl.js",
   "scripts": {
-    "start": "nodemon -e '*' --watch /var/run/docker/",
+    "start": "nodemon ./method-curl.js --watch .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

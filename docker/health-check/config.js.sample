@@ -1,0 +1,17 @@
+module.exports = {
+  aws: {
+    region: 'us-west-1',
+    access_key_id: '',
+    secret_access_key: '',
+  },
+  slack: {
+    host: 'hooks.slack.com',
+    path: '/services///',
+  },
+  sms: {
+    PhoneNumber: '+',
+  },
+  sns: {
+    DefaultSenderID: 'IdeaRobin',
+  }
+}

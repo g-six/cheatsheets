@@ -55,6 +55,8 @@ export SPOT_REQ_ID=`aws ec2 request-spot-instances \
         \"UserData\": \"$EC2_B64\"
     }"`
 printf 'SPOT_REQ_ID='$SPOT_REQ_ID
+printf 'export SPOT_REQ_ID='$SPOT_REQ_ID > load-instance-info.sh
+
 if [[ -z $SPOT_REQ_ID ]] ; then
   printf "Unable to fulfill request-spot-instances"
   exit 1
@@ -69,6 +71,9 @@ export EC2_ID=`aws ec2 describe-spot-instance-requests \
 printf 'EC2_ID='$EC2_ID
 
 sleep 3
+
+aws ssm put-parameter --name EC2_ID --value $EC2_ID --type String --overwrite
+aws ssm put-parameter --name SPOT_REQ_ID --value $SPOT_REQ_ID --type String --overwrite
 
 aws ec2 create-tags \
   --resources $SPOT_REQ_ID $EC2_ID \

@@ -1,0 +1,14 @@
+export HEADER=$(cat ./header.txt)
+
+# Color definitions
+export CYAN='\033[0;36m'
+export LCYAN='\033[1;36m'
+export LPURP='\033[1;35m'
+export ORANGE='\033[0;33m'
+export RED='\033[0;31m'
+export YELLOW='\033[1;33m'
+export NC='\033[0m' # No Color
+
+# Emojis
+export ROCKET='\xf0\x9f\x9a\x80'
+export WRONG='\xe2\x9d\x8c'

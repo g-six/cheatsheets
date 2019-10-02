@@ -1,0 +1,16 @@
+{
+  "name": "sitrep",
+  "version": "0.0.1",
+  "description": "Container monitoring system",
+  "main": "sitrep.js",
+  "scripts": {
+    "start": "nodemon -e '*' --watch /var/run/docker/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.540.0",
+    "nodemon": "^1.19.3"
+  }
+}

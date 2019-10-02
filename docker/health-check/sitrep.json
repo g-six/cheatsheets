@@ -1,0 +1,257 @@
+[
+   {
+      "Labels" : {},
+      "HostConfig" : {
+         "NetworkMode" : "default"
+      },
+      "Command" : "/bin/sh",
+      "Names" : [
+         "/sitrep-socket"
+      ],
+      "Ports" : [],
+      "Id" : "104f8b4a01b7dbeecacc16fc74dd2e8e5e1770ba6677959c8064a36263b8b056",
+      "NetworkSettings" : {
+         "Networks" : {
+            "bridge" : {
+               "IPPrefixLen" : 16,
+               "Aliases" : null,
+               "GlobalIPv6Address" : "",
+               "IPAMConfig" : null,
+               "Links" : null,
+               "DriverOpts" : null,
+               "GlobalIPv6PrefixLen" : 0,
+               "EndpointID" : "433c6f85dde8bddadbc7980ded6941908ccb881f217e3b6b7d42ee24eede0556",
+               "MacAddress" : "02:42:ac:11:00:02",
+               "IPv6Gateway" : "",
+               "Gateway" : "172.17.0.1",
+               "IPAddress" : "172.17.0.2",
+               "NetworkID" : "6033fbdc364682361e0c78a6a03f198ac0d7b82af20be530e6b7c693140ef04d"
+            }
+         }
+      },
+      "Image" : "byrnedo/alpine-curl",
+      "Created" : 1569987752,
+      "ImageID" : "sha256:026de4ba95309bba3c8b8ea13862c255fb5e71fe3704076c92d706773cc4fd45",
+      "Mounts" : [
+         {
+            "Type" : "bind",
+            "Source" : "/var/run/docker.sock",
+            "Destination" : "/var/run/docker.sock",
+            "Mode" : "",
+            "RW" : true,
+            "Propagation" : "rprivate"
+         }
+      ],
+      "Status" : "Up 2 hours",
+      "State" : "running"
+   },
+   {
+      "Command" : "docker-entrypoint.sh npm start",
+      "Labels" : {
+         "com.docker.compose.oneoff" : "False",
+         "com.docker.compose.container-number" : "1",
+         "com.docker.compose.project" : "idearobincom",
+         "com.docker.compose.version" : "1.24.1",
+         "com.docker.compose.service" : "app",
+         "com.docker.compose.config-hash" : "9e6c00c20660de31033fb3bc05e31c78f4d6b6be91cdc365829e608c2e5e7dfa"
+      },
+      "HostConfig" : {
+         "NetworkMode" : "ksl-network"
+      },
+      "Ports" : [
+         {
+            "PublicPort" : 9002,
+            "PrivatePort" : 80,
+            "Type" : "tcp",
+            "IP" : "0.0.0.0"
+         }
+      ],
+      "Names" : [
+         "/idearobincom_app_1"
+      ],
+      "Image" : "idearobincom_app",
+      "NetworkSettings" : {
+         "Networks" : {
+            "ksl-network" : {
+               "NetworkID" : "ad95d4dc0502d95f0a577c259ff479fef1de4cd4bf3a6f290e4e2696ce9255bd",
+               "IPAddress" : "172.18.0.4",
+               "IPv6Gateway" : "",
+               "Gateway" : "172.18.0.1",
+               "EndpointID" : "d6a7aeb21a387b7bc807cb687a6a5d59c07a5a907ee9322d2d7ca9c2ef6c3123",
+               "MacAddress" : "02:42:ac:12:00:04",
+               "Links" : null,
+               "DriverOpts" : null,
+               "GlobalIPv6PrefixLen" : 0,
+               "IPAMConfig" : null,
+               "IPPrefixLen" : 16,
+               "Aliases" : null,
+               "GlobalIPv6Address" : ""
+            }
+         }
+      },
+      "Id" : "506bf9828ad8c318235ffe673f19cd2eb817ab4b4ef483039ece4aead28896bf",
+      "Created" : 1569815816,
+      "ImageID" : "sha256:28195aaeabfdc38f015ba7a111d1d46c6e7f764625f9256e3b93dfcd47d5bb9f",
+      "Status" : "Up 20 hours",
+      "State" : "running",
+      "Mounts" : [
+         {
+            "Propagation" : "rprivate",
+            "RW" : true,
+            "Mode" : "rw",
+            "Destination" : "/usr/src/app",
+            "Source" : "/home/ubuntu/idearobin.com/app",
+            "Type" : "bind"
+         },
+         {
+            "Propagation" : "rprivate",
+            "RW" : true,
+            "Mode" : "rw",
+            "Destination" : "/usr/src/coverage",
+            "Source" : "/home/ubuntu/coverages/idearobin.com",
+            "Type" : "bind"
+         },
+         {
+            "Propagation" : "rprivate",
+            "RW" : true,
+            "Source" : "/home/ubuntu/sockets/idearobin.com",
+            "Type" : "bind",
+            "Mode" : "rw",
+            "Destination" : "/usr/src/sockets"
+         },
+         {
+            "Type" : "bind",
+            "Source" : "/home/ubuntu/idearobin.com/webpack.config.js",
+            "Destination" : "/usr/src/webpack.config.js",
+            "Mode" : "ro",
+            "RW" : false,
+            "Propagation" : "rprivate"
+         }
+      ]
+   },
+   {
+      "Command" : "nginx -g 'daemon off;'",
+      "HostConfig" : {
+         "NetworkMode" : "host"
+      },
+      "Labels" : {
+         "maintainer" : "NGINX Docker Maintainers <docker-maint@nginx.com>"
+      },
+      "NetworkSettings" : {
+         "Networks" : {
+            "host" : {
+               "IPAddress" : "",
+               "NetworkID" : "92f84591789f10835f2ca81efd225ca75be7df583fee1e54edfd4b6fdb10dd90",
+               "EndpointID" : "de2fe17183df576021f63bd7919eb6a2aa79e2b2b48c8eac4a8367be057c0460",
+               "MacAddress" : "",
+               "Gateway" : "",
+               "IPv6Gateway" : "",
+               "IPAMConfig" : null,
+               "GlobalIPv6PrefixLen" : 0,
+               "DriverOpts" : null,
+               "Links" : null,
+               "GlobalIPv6Address" : "",
+               "Aliases" : null,
+               "IPPrefixLen" : 0
+            }
+         }
+      },
+      "Id" : "91881e991a5bb8af0861eb87318c3851ad4345f688aafd9bce92552ed1d49700",
+      "Image" : "nginx:alpine",
+      "Ports" : [],
+      "Names" : [
+         "/nginx"
+      ],
+      "ImageID" : "sha256:55ceb2abad47854d182034514057b038a6e50e9d029ba152bd713d535ed39603",
+      "Created" : 1567732926,
+      "Status" : "Up 20 hours",
+      "State" : "running",
+      "Mounts" : [
+         {
+            "Type" : "bind",
+            "Source" : "/home/ubuntu/xsquad-artifacts/nginx/conf.d",
+            "Destination" : "/etc/nginx/conf.d",
+            "Mode" : "ro",
+            "RW" : false,
+            "Propagation" : "rprivate"
+         },
+         {
+            "Propagation" : "rprivate",
+            "RW" : false,
+            "Source" : "/home/ubuntu/sockets",
+            "Type" : "bind",
+            "Mode" : "ro",
+            "Destination" : "/etc/nginx/sockets"
+         },
+         {
+            "Type" : "bind",
+            "Source" : "/home/ubuntu/coverages",
+            "Destination" : "/usr/share/nginx/html/coverages",
+            "Mode" : "ro",
+            "RW" : false,
+            "Propagation" : "rprivate"
+         },
+         {
+            "Destination" : "/usr/share/nginx/html/www",
+            "Mode" : "ro",
+            "Type" : "bind",
+            "Source" : "/home/ubuntu/www",
+            "RW" : false,
+            "Propagation" : "rprivate"
+         }
+      ]
+   },
+   {
+      "Mounts" : [
+         {
+            "Destination" : "/var/lib/postgresql/data",
+            "Mode" : "",
+            "Type" : "bind",
+            "Source" : "/home/ubuntu/codefantry-db",
+            "RW" : true,
+            "Propagation" : "rprivate"
+         }
+      ],
+      "State" : "running",
+      "Status" : "Up 20 hours",
+      "Created" : 1565005104,
+      "ImageID" : "sha256:53912975086f1470f877922e3eb79c4f17c403fcb0b51b1f45df9b623987600e",
+      "Ports" : [
+         {
+            "PublicPort" : 5433,
+            "IP" : "0.0.0.0",
+            "Type" : "tcp",
+            "PrivatePort" : 5432
+         }
+      ],
+      "Names" : [
+         "/postgres-codefantry"
+      ],
+      "NetworkSettings" : {
+         "Networks" : {
+            "ksl-network" : {
+               "Aliases" : null,
+               "GlobalIPv6Address" : "",
+               "IPPrefixLen" : 16,
+               "IPAMConfig" : null,
+               "GlobalIPv6PrefixLen" : 0,
+               "DriverOpts" : null,
+               "Links" : null,
+               "MacAddress" : "02:42:ac:12:00:02",
+               "EndpointID" : "653ced3a3994a55a116254ce6b49ba026f25e4308cec726baddf22d4e4057a7e",
+               "Gateway" : "172.18.0.1",
+               "IPv6Gateway" : "",
+               "IPAddress" : "172.18.0.2",
+               "NetworkID" : "ad95d4dc0502d95f0a577c259ff479fef1de4cd4bf3a6f290e4e2696ce9255bd"
+            }
+         }
+      },
+      "Id" : "6e34861a5e04d4dba068f2510ea401596cbc8af8231f422f58f32e893690262c",
+      "Image" : "postgres",
+      "Labels" : {},
+      "HostConfig" : {
+         "NetworkMode" : "ksl-network"
+      },
+      "Command" : "docker-entrypoint.sh postgres"
+   }
+]

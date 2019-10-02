@@ -1,48 +1,31 @@
 #!/bin/bash
-if [[ -z $EC2_TAG ]] ; then
-  echo "\nPlease provide a short description for your instances"
-  echo "export EC2_TAG=\n"
+if [[ $# -ne 5 ]] ; then
+  printf '> bash '$0' <ami> <type> <secgroup> <key-pair> <tag>\n'
   exit 1
 fi
 
-if [[ -z $EC2_KEY ]] ; then
-  echo "\nPlease provide key-pair for launch"
-  echo "export EC2_KEY=\n"
-  exit 1
-fi
-
-if [[ -z $EC2_SECGROUP ]] ; then
-  echo "\nPlease set security group"
-  echo "export EC2_SECGROUP=\n"
-  exit 1
-fi
-
-if [[ -z $EC2_TYPE ]] ; then
-  echo "\nPlease set desired instance type"
-  echo "export EC2_TYPE=\n"
-  exit 1
-fi
-
-if [[ -n $AMI_NAME ]] ; then
-  export AMI_NAME=","$AMI_NAME
-fi
+AMI_NAME=$1
+EC2_TYPE=$2
+EC2_SECGROUP=$3
+EC2_KEY=$4
+EC2_TAG=$5
 
 export AWS_ID=`aws sts get-caller-identity --query Account --output text`
-echo 'Account: '$AWS_ID
+printf 'Account: '$AWS_ID
+export EC2_PROFILE="arn:aws:iam::"$AWS_ID":instance-profile/instance-role"
+printf 'Instance profile: '$EC2_PROFILE
 
 export IAM_USER=`aws sts get-caller-identity --query UserId --output text`
-echo 'Username: '$IAM_USER
+printf 'Username: '$IAM_USER
 
-export EC2_PROFILE="arn:aws:iam::"$AWS_ID":instance-profile/instance-role"
-echo 'Instance profile: '$EC2_PROFILE
-echo "Key pair: "$EC2_KEY
+printf "Key pair: "$EC2_KEY
 
 export AMI_ID=`aws ec2 describe-images \
   --owners self \
   --output text \
   --query Images[0].[ImageId] \
   --filters Name=name,Values="$AMI_NAME"`
-echo 'AMI ID: '$AMI_ID
+printf 'AMI ID: '$AMI_ID
 
 export SPOT_PRICE=`aws ec2 describe-spot-price-history \
   --no-paginate \
@@ -51,7 +34,7 @@ export SPOT_PRICE=`aws ec2 describe-spot-price-history \
   --product-descriptions "Linux/UNIX" \
   --output text \
   --query SpotPriceHistory[0].SpotPrice`
-echo 'Spot price: '$SPOT_PRICE
+printf 'Spot price: '$SPOT_PRICE
 
 export SPOT_REQ_ID=`aws ec2 request-spot-instances \
   --availability-zone-group ap-southeast-1a \
@@ -71,9 +54,9 @@ export SPOT_REQ_ID=`aws ec2 request-spot-instances \
         \"SecurityGroups\": [\"$EC2_SECGROUP\"], \
         \"UserData\": \"$EC2_B64\"
     }"`
-echo 'SPOT_REQ_ID='$SPOT_REQ_ID
+printf 'SPOT_REQ_ID='$SPOT_REQ_ID
 if [[ -z $SPOT_REQ_ID ]] ; then
-  echo "Unable to fulfill request-spot-instances"
+  printf "Unable to fulfill request-spot-instances"
   exit 1
 fi
 
@@ -83,7 +66,7 @@ export EC2_ID=`aws ec2 describe-spot-instance-requests \
   --query SpotInstanceRequests[0].InstanceId \
   --output text \
   --spot-instance-request-ids $SPOT_REQ_ID`
-echo 'EC2_ID='$EC2_ID
+printf 'EC2_ID='$EC2_ID
 
 sleep 3
 
@@ -96,6 +79,6 @@ export EC2_ASSOC=`aws ec2 associate-address \
 	--allocation-id $EC2_EIP \
 	--instance-id $EC2_ID`
 
-echo 'Elastic IP Association ID='$EC2_ASSOC
+printf 'Elastic IP Association ID='$EC2_ASSOC
 
-echo '\n'
+printf '\n'

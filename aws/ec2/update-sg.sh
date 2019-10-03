@@ -13,7 +13,8 @@ NC='\033[0m' # No Color
 # Emojis
 ROCKET='\xf0\x9f\x9a\x80'
 WRONG='\xe2\x9d\x8c'
-
+FROM_PORT=22
+TO_PORT=22
 
 case $2 in
   me)
@@ -30,6 +31,12 @@ CMD="aws ${SERVICE}"
 OPTS="--group-name ${3}"
 DESCRIPTION="Description=${4}"
 
+echo $#
+if [[ $# -eq 6 ]] ; then
+  FROM_PORT=$5
+  TO_PORT=$6
+fi
+
 if [ $DESCRIPTION = "Description=" ]; then
   printf "\n${WRONG} ${RED}You need to provide a description for IP: ${CIDR}${NC}\n\n"
   exit
@@ -39,7 +46,7 @@ case $1 in
   add)
     COMMAND='authorize-security-group-ingress'
     OPTS=$OPTS' --ip-permissions'
-    OPTS=$OPTS' FromPort=22,ToPort=22,IpProtocol=tcp,IpRanges=['
+    OPTS=$OPTS' FromPort='$FROM_PORT',ToPort='$TO_PORT',IpProtocol=tcp,IpRanges=['
     OPTS=$OPTS"'"'{CidrIp='$CIDR','$DESCRIPTION"'}]"
     ;;
   remove)

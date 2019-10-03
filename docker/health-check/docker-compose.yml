@@ -3,4 +3,5 @@ services:
   sitrep:
     build: .
     entrypoint: ['npm', 'start']
+    restart: unless-stopped
 

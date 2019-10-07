@@ -1,0 +1,7 @@
+{
+  "Paths": {
+    "Quantity": 1,
+    "Items": ["/*"]
+  },
+  "CallerReference": "my-invalidation-2015-09-01"
+}

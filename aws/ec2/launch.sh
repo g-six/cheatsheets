@@ -1,6 +1,6 @@
 #!/bin/bash
-if [[ $# -lt 5 ]] ; then
-  printf '> bash '$0' <ami> <type> <secgroup> <tag> <ec2eip> <key-pair>\n'
+if [[ $# -lt 4 ]] ; then
+  printf '> bash '$0' <ami> <type> <secgroup> <tag> [ec2eip] [key-pair]\n'
   exit 1
 fi
 
@@ -11,6 +11,41 @@ EC2_TAG=$4
 EC2_EIP=$5
 EC2_KEY=$6
 
+echo '---------------------------------------------'
+printf "\n"
+
+if [[ -z $5 ]] ; then
+  printf "No Elastic IP provided, searching EIP tagged $EC2_TAG...\n"
+  export EC2_EIP=$(aws ec2 describe-addresses --filters Name=tag:Name,Values=$EC2_TAG --query Addresses[0].AllocationId --output text)
+  if [ -n $EC2_EIP ] ; then
+    printf "Elastic IP found: $EC2_EIP\n"
+  else
+    printf 'No Elastic IP found\n'
+    exit 1
+  fi
+fi
+
+if [ -z $EC2_EIP ] ; then
+  printf 'No Elastic IP provided or found\n'
+  exit 1
+fi
+
+printf "\n"
+
+if [ -z $EC2_KEY ] ; then
+  key=$(cat ~/.ssh/id_rsa.pub | xargs)
+
+  echo '#!/bin/bash' > raw.txt
+  raw='echo "'$key'" > /home/ubuntu/.ssh/authorized_keys'
+
+  echo $raw >> raw.txt
+  export USER_DATA=$(cat raw.txt | base64)
+
+  printf "Attach user data:\n$USER_DATA\n\n"
+else
+  printf "Key pair: $EC2_KEY\n\n"
+fi
+
 export AWS_ID=`aws sts get-caller-identity --query Account --output text`
 printf '\nAccount: '$AWS_ID
 export EC2_PROFILE="arn:aws:iam::"$AWS_ID":instance-profile/instance-role"
@@ -18,8 +53,6 @@ printf '\nInstance profile: '$EC2_PROFILE
 
 export IAM_USER=`aws sts get-caller-identity --query UserId --output text`
 printf '\nUsername: '$IAM_USER
-
-printf "\nKey pair: "$EC2_KEY
 
 export AMI_ID=`aws ec2 describe-images \
   --owners self \
@@ -37,20 +70,20 @@ export SPOT_PRICE=`aws ec2 describe-spot-price-history \
   --query SpotPriceHistory[0].SpotPrice`
 printf '\nSpot price: '$SPOT_PRICE
 
-key=$(cat ~/.ssh/id_rsa.pub | xargs)
-
-echo '#!/bin/bash' > raw.txt
-raw='echo "'$key'" >> /home/ubuntu/.ssh/authorized_keys'
-
-echo $raw >> raw.txt
-
 echo '{' > launch-spec.json
-echo "   \"ImageId\":\"$AMI_ID\"," >> launch-spec.json
-echo "   \"InstanceType\":\"$EC2_TYPE\"," >> launch-spec.json
-echo "   \"Placement\":{\"AvailabilityZone\": \"ap-southeast-1a\"}," >> launch-spec.json
-echo "   \"IamInstanceProfile\": {\"Arn\": \"$EC2_PROFILE\"}," >> launch-spec.json
-echo "   \"SecurityGroups\": [\"$EC2_SECGROUP\"]," >> launch-spec.json
-echo "   \"KeyName\":\"$EC2_KEY\"" >> launch-spec.json
+echo "   \"ImageId\":\"$AMI_ID\"" >> launch-spec.json
+echo "   ,\"InstanceType\":\"$EC2_TYPE\"" >> launch-spec.json
+echo "   ,\"Placement\":{\"AvailabilityZone\": \"ap-southeast-1a\"}" >> launch-spec.json
+echo "   ,\"IamInstanceProfile\": {\"Arn\": \"$EC2_PROFILE\"}" >> launch-spec.json
+echo "   ,\"SecurityGroups\": [\"$EC2_SECGROUP\"]" >> launch-spec.json
+if [ "$USER_DATA" ] ; then
+  echo "   ,\"UserData\": \"$USER_DATA\"" >> launch-spec.json
+fi
+
+if [ "$EC2_KEY" ] ; then
+  echo "   ,\"KeyName\":\"$EC2_KEY\"" >> launch-spec.json
+fi
+
 echo '}' >> launch-spec.json
 
 export SPOT_REQ_ID=`aws ec2 request-spot-instances \
@@ -79,6 +112,10 @@ printf '\nEC2_ID='$EC2_ID
 
 sleep 3
 
+if [[ -z $EC2_ID ]] ; then
+  sleep 2
+fi
+
 aws ssm put-parameter --name EC2_ID --value $EC2_ID --type String --overwrite
 aws ssm put-parameter --name SPOT_REQ_ID --value $SPOT_REQ_ID --type String --overwrite
 
@@ -87,12 +124,12 @@ aws ec2 create-tags \
   --tags Key=Name,Value="$EC2_TAG" \
          Key=Creator,Value="$IAM_USER"
 
-if [[ -z $6 ]] ; then
+if [ -n $EC2_EIP ] ; then
   export EC2_ASSOC=`aws ec2 associate-address \
     --allocation-id $EC2_EIP \
     --instance-id $EC2_ID`
 
-  printf '\nElastic IP Association ID='
+  printf '\nElastic IP Association ID\n'
   echo $EC2_ASSOC
 fi
 

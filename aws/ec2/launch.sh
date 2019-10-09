@@ -137,6 +137,7 @@ done
 aws ec2 create-tags \
   --resources $SPOT_REQ_ID $EC2_ID \
   --tags Key=Name,Value="$EC2_TAG" \
+         Key=Owner,Value=`whoami` \
          Key=Creator,Value="$IAM_USER"
 
 if [ -n $EC2_EIP ] ; then

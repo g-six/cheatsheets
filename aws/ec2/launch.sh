@@ -56,7 +56,7 @@ if [ -z $EC2_KEY ] ; then
   echo $raw >> raw.txt
   raw='usermod -aG cardinals '`whoami`
   echo $raw >> raw.txt
-  raw='usermod -aG sudo'`whoami`
+  raw='usermod -aG sudo '`whoami`
   echo $raw >> raw.txt
 
   raw='mkdir /home/'`whoami`'/.ssh'
@@ -69,6 +69,18 @@ if [ -z $EC2_KEY ] ; then
   echo $raw >> raw.txt
 
   raw='chmod 600 /home/'`whoami`'/.ssh/authorized_keys'
+  echo $raw >> raw.txt
+
+  raw='cp /home/idearobin/.vimrc /home/'`whoami`'/.vimrc'
+  echo $raw >> raw.txt
+
+  raw='chown '`whoami`':'`whoami`' /home/'`whoami`'/.vimrc'
+  echo $raw >> raw.txt
+
+  raw='runuser -l '`whoami`' -c "pip3 install awscli --upgrade --user"'
+  echo $raw >> raw.txt
+
+  raw='echo "export PATH=/home/'`whoami`'/.local/bin:$PATH" >> /home/'`whoami`'/.profile'
   echo $raw >> raw.txt
 
   export USER_DATA=$(cat raw.txt | base64)

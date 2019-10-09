@@ -83,6 +83,9 @@ if [ -z $EC2_KEY ] ; then
   raw='echo "export PATH=/home/'`whoami`'/.local/bin:$PATH" >> /home/'`whoami`'/.profile'
   echo $raw >> raw.txt
 
+  raw='echo "complete -C /home/'`whoami`'/.local/bin/aws_completer aws" >> /home/'`whoami`'/.bashrc'
+  echo $raw >> raw.txt
+
   export USER_DATA=$(cat raw.txt | base64)
 
   printf "Attach user data:\n$USER_DATA\n\n"

@@ -9,7 +9,7 @@ echo $raw >> raw.txt
 raw='echo "%cardinals ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-cloud-init-users'
 echo $raw >> raw.txt
 
-raw='curl ifconfig.co > /etc/hostname'
+raw='curl ifconfig.co | tr "." "-" > /etc/hostname'
 echo $raw >> raw.txt
 
 raw='adduser --disabled-password --gecos "" '`whoami`
@@ -51,3 +51,6 @@ echo $raw >> raw.txt
 
 raw='chown '`whoami`':'`whoami`' /home/'`whoami`'/.bash_completion'
 echo $raw >> raw.txt
+
+echo 'sleep 3' >> raw.txt
+echo 'sudo reboot' >> raw.txt

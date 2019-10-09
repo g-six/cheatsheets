@@ -1,20 +1,23 @@
 #!/bin/bash
-if [[ $# -lt 4 ]] ; then
-  printf '> bash '$0' <ami> <type> <secgroup> <tag> [ec2eip] [key-pair]\n'
+if [[ $# -lt 2 ]] ; then
+  printf '> bash '$0' <tag> <secgroup> [instance-type] [ec2eip] [key-pair]\n'
   exit 1
 fi
 
-AMI_NAME=$1
-EC2_TYPE=$2
-EC2_SECGROUP=$3
-EC2_TAG=$4
-EC2_EIP=$5
-EC2_KEY=$6
+EC2_TAG=$1
+EC2_SECGROUP=$2
+EC2_TYPE=$3
+EC2_EIP=$4
+EC2_KEY=$5
+
+if [[ $# -lt 3 ]] ; then
+  EC2_TYPE=t3a.micro
+fi
 
 echo '---------------------------------------------'
 printf "\n"
 
-if [[ -z $5 ]] ; then
+if [[ -z $4 ]] ; then
   printf "No Elastic IP provided, searching EIP tagged $EC2_TAG...\n"
   export EC2_EIP=$(aws ec2 describe-addresses --filters Name=tag:Name,Values=$EC2_TAG --query Addresses[0].AllocationId --output text)
   if [ -n $EC2_EIP ] ; then
@@ -58,7 +61,7 @@ export AMI_ID=`aws ec2 describe-images \
   --owners self \
   --output text \
   --query Images[0].[ImageId] \
-  --filters Name=name,Values="$AMI_NAME"`
+  --filters Name=name,Values="$EC2_TAG"`
 printf '\nAMI ID: '$AMI_ID
 
 export SPOT_PRICE=`aws ec2 describe-spot-price-history \
@@ -102,22 +105,31 @@ if [[ -z $SPOT_REQ_ID ]] ; then
   exit 1
 fi
 
-sleep 5
+while [[ -z $EC2_ID ]]
+do
+  sleep 3
+  EC2_ID=`aws ec2 describe-spot-instance-requests \
+    --query SpotInstanceRequests[0].InstanceId \
+    --output text \
+    --spot-instance-request-ids $SPOT_REQ_ID`
+done
 
-export EC2_ID=`aws ec2 describe-spot-instance-requests \
-  --query SpotInstanceRequests[0].InstanceId \
-  --output text \
-  --spot-instance-request-ids $SPOT_REQ_ID`
 printf '\nEC2_ID='$EC2_ID
 
-sleep 3
-
-if [[ -z $EC2_ID ]] ; then
-  sleep 2
-fi
-
-aws ssm put-parameter --name EC2_ID --value $EC2_ID --type String --overwrite
-aws ssm put-parameter --name SPOT_REQ_ID --value $SPOT_REQ_ID --type String --overwrite
+INSTANCE_STATE=`aws ec2 describe-instances \
+  --instance-ids $EC2_ID \
+  --query Reservations[0].Instances[0].State.Name \
+  --output text`
+printf '\n\n'
+while [[ $INSTANCE_STATE != 'running' ]]
+do
+  printf ' *'
+  sleep 1
+  INSTANCE_STATE=`aws ec2 describe-instances \
+    --instance-ids $EC2_ID \
+    --query Reservations[0].Instances[0].State.Name \
+    --output text`
+done
 
 aws ec2 create-tags \
   --resources $SPOT_REQ_ID $EC2_ID \

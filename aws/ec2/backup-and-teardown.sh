@@ -57,6 +57,7 @@ do
   sleep 5
   AMI_STATE=$(bash ./get-image-state.sh $NEW_AMI_ID)
 done
+printf "\n"
 
 if [ -z $NEW_AMI_ID ] ; then
   printf "Failed to create image.\nPlease try again.\n"

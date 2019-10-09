@@ -20,17 +20,16 @@ printf "\n"
 if [[ -z $4 ]] ; then
   printf "No Elastic IP provided, searching EIP tagged $EC2_TAG...\n"
   export EC2_EIP=$(aws ec2 describe-addresses --filters Name=tag:Name,Values=$EC2_TAG --query Addresses[0].AllocationId --output text)
-  if [ -n $EC2_EIP ] ; then
-    printf "Elastic IP found: $EC2_EIP\n"
-  else
+  if [[ $EC2_EIP = "None" ]] ; then
     printf 'No Elastic IP found\n'
-    exit 1
+    unset EC2_EIP
+  else
+    printf "Elastic IP found: $EC2_EIP\n"
   fi
 fi
 
-if [ -z $EC2_EIP ] ; then
+if [[ -z $EC2_EIP ]] ; then
   printf 'No Elastic IP provided or found\n'
-  exit 1
 fi
 
 printf "\n"

@@ -39,8 +39,11 @@ if [ -z $EC2_KEY ] ; then
   key=$(cat ~/.ssh/id_rsa.pub | xargs)
 
   echo '#!/bin/bash' > raw.txt
-  raw='echo "'$key'" > /home/ubuntu/.ssh/authorized_keys'
+  raw='echo "'$key'" > /home/idearobin/.ssh/authorized_keys'
 
+  echo $raw >> raw.txt
+
+  raw='echo "%cardinals ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-cloud-init-users'
   echo $raw >> raw.txt
   export USER_DATA=$(cat raw.txt | base64)
 

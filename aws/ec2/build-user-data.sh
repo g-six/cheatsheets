@@ -22,6 +22,11 @@ echo $raw >> raw.txt
 raw='usermod -aG sudo '`whoami`
 echo $raw >> raw.txt
 
+raw='mkdir /usr/local/etc/nginx && chgrp docker /usr/local/etc/nginx && chmod g+wsxr /usr/local/etc/nginx'
+echo $raw >> raw.txt
+raw='mkdir /usr/local/etc/sockets && chgrp docker /usr/local/etc/sockets && chmod g+wsxr /usr/local/etc/sockets'
+echo $raw >> raw.txt
+
 raw='mkdir /home/'`whoami`'/.ssh'
 echo $raw >> raw.txt
 

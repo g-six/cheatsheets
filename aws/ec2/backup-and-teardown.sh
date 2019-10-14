@@ -4,6 +4,10 @@ if [ $# -lt 1 ] ; then
   exit 1
 fi
 
+bash ./header-runner.sh
+printf "\n"
+printf "\n"
+
 EC2_TAG=$1
 printf "Retrieving instance information: $EC2_TAG\n\n"
 

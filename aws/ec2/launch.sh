@@ -14,7 +14,7 @@ if [[ $# -lt 3 ]] ; then
   EC2_TYPE=t3a.micro
 fi
 
-echo '---------------------------------------------'
+bash ./header-runner.sh
 printf "\n"
 
 if [[ -z $4 ]] ; then
@@ -32,7 +32,7 @@ printf "\n"
 
 if [ -z $EC2_KEY ] ; then
   bash ./build-user-data.sh
-  export USER_DATA=$(base64 -w0 raw.txt)
+  export USER_DATA=$(base64 raw.txt | xargs)
 
   printf "Attach user data:\n$USER_DATA\n\n"
 else

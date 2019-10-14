@@ -32,7 +32,7 @@ printf "\n"
 
 if [ -z $EC2_KEY ] ; then
   bash ./build-user-data.sh
-  export USER_DATA=$(base64 -w0 raw.txt)
+  export USER_DATA=$(base64 raw.txt | xargs)
 
   printf "Attach user data:\n$USER_DATA\n\n"
 else

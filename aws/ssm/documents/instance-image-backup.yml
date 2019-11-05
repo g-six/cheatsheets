@@ -1,0 +1,50 @@
+---
+description: "Creates a new Amazon Machine Image (AMI) from an Amazon EC2 instance"
+schemaVersion: "0.3"
+assumeRole: "{{ AutomationAssumeRole }}"
+parameters:
+  InstanceId:
+    type: "String"
+    description: "(Required) The ID of the Amazon EC2 instance."
+  ImageName:
+    type: "String"
+    description: "(Required) The name of the resulting image."
+  NoReboot:
+    type: "Boolean"
+    description: "(Optional) Do not reboot the instance before creating the image."
+    default: false
+  AutomationAssumeRole:
+    type: "String"
+    description: "(Optional) The ARN of the role that allows Automation to perform\
+      \ the actions on your behalf. "
+    default: ""
+mainSteps:
+- name: GetImage
+  action: aws:executeAwsApi
+  onFailure: "Abort"
+  inputs:
+    Service: ec2
+    Api: DescribeImages
+    Filters:
+    - Name: "name"
+      Values:
+      - "{{ ImageName }}"
+  outputs:
+    - Name: AmiId
+      Selector: "$.Images[0].ImageId"
+      Type: String
+- name: "deleteImage"
+  action: "aws:deleteImage"
+  onFailure: "Abort"
+  inputs:
+    ImageId: "{{GetImage.AmiId}}"
+- name: "createImage"
+  action: "aws:createImage"
+  onFailure: "Abort"
+  inputs:
+    InstanceId: "{{ InstanceId }}"
+    ImageName: "{{ ImageName }}"
+    NoReboot: "{{ NoReboot }}"
+outputs:
+- "createImage.ImageId"
+

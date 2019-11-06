@@ -112,4 +112,3 @@ outputs:
 - "createImage.ImageId"
 - "getImage.AmiId"
 ```
-```

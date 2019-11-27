@@ -30,13 +30,22 @@ fi
 
 printf "\n"
 
-if [ -z $EC2_KEY ] ; then
+if [[ -z $EC2_KEY ]] ; then
   bash ./build-user-data.sh
-  export USER_DATA=$(base64 -w 0 raw.txt)
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    export USER_DATA=$(base64 raw.txt)
+  else
+    export USER_DATA=$(base64 -w 0 raw.txt)
+  fi
 
   printf "Attach user data:\n$USER_DATA\n\n"
 else
   printf "Key pair: $EC2_KEY\n\n"
+fi
+
+if [[ -z $USER_DATA ]] ; then
+  exit 1
 fi
 
 export AWS_ID=`aws sts get-caller-identity --query Account --output text`

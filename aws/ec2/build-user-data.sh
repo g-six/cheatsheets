@@ -30,7 +30,7 @@ echo $raw >> raw.txt
 raw='mkdir /home/'`whoami`'/.ssh'
 echo $raw >> raw.txt
 
-raw='echo "'$key'" > /home/'`whoami`'/.ssh/authorized_keys'
+raw='echo "'$key'" >> /home/'`whoami`'/.ssh/authorized_keys'
 echo $raw >> raw.txt
 
 raw='chown -R '`whoami`':'`whoami`' /home/'`whoami`'/.ssh'

@@ -90,7 +90,6 @@ echo '}' >> launch-spec.json
 
 export SPOT_REQ_ID=`aws ec2 request-spot-instances \
   --availability-zone-group ap-southeast-1a \
-  --spot-price $SPOT_PRICE \
   --instance-count 1 \
   --instance-interruption-behavior stop \
   --type persistent \
